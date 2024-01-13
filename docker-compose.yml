@@ -1,0 +1,82 @@
+# C Sharp Dot Net Core Docker
+version: '3'
+services:
+
+  db-mongo:
+    image: mongo
+    restart: always
+    container_name: mongodb
+    ports:
+      - "27017:27017/tcp"
+    volumes:
+      - ./mongo/db-notes-mongo:/data/db
+      - ./mongo/mongo-entrypoint:/docker-entrypoint-initdb.d
+    networks:
+      vscode:
+        aliases:
+            - vscode
+
+
+  mongo_admin:
+    image: mongo-express
+    restart: always
+    container_name: mongo_admin
+    ports:
+      - "8081:8081"
+    environment:
+        ME_CONFIG_OPTIONS_EDITORTHEME: ambiance
+        ME_CONFIG_BASICAUTH_USERNAME: mongo
+        ME_CONFIG_BASICAUTH_PASSWORD: 11111
+        ME_CONFIG_MONGODB_SERVER:  db-mongo
+    links:
+      - db-mongo  
+    networks:
+      vscode:
+        aliases:
+            - vscode
+
+
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: resources/DockerfileBackend
+    links:
+      - db-mongo
+    ports:
+        - "8080:80"
+    volumes:
+      - ./backend/:/src
+    networks:
+      vscode:
+        aliases:
+            - vscode
+
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: resources/DockerfileFrontend
+    links:
+      - db-mongo
+      - backend
+    command: >
+      /bin/bash -c "
+        npm install
+        npm start
+      "
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./frontend:/app
+    networks:
+      vscode:
+        aliases:
+            - vscode
+
+
+networks:
+  vscode:
+    driver: bridge      

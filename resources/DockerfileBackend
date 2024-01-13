@@ -1,0 +1,39 @@
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-buster-slim AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0-buster AS build
+
+ADD /backend /src
+
+WORKDIR /src
+
+
+# Map all files from src folder 
+
+
+# Copy all files from src folder 
+#COPY /src .
+
+#COPY HelloWorldAPI.sln HelloWorldAPI.sln
+#COPY ["HelloWorldAPI/HelloWorldAPI.csproj", "HelloWorldAPI/"]
+#COPY ["HelloWorldAPItest/HelloWorldAPItest.csproj", "HelloWorldAPItest/"]
+
+RUN dotnet restore "api/api.csproj"
+
+#COPY . .
+
+WORKDIR "/src/api"
+RUN dotnet build "api.csproj" -c Release -o /app
+WORKDIR /src/apitest
+RUN dotnet test -c Release
+WORKDIR "/src/api"
+
+
+FROM build AS publish
+RUN dotnet publish "api.csproj" -c Release -o /app
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app .
+ENTRYPOINT ["dotnet", "api.dll"]
