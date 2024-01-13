@@ -3,6 +3,7 @@ FROM node:16
 RUN mkdir /app
 WORKDIR /app
 COPY /frontend /app
+RUN npm install -g react-scripts
 RUN npm install
 RUN npm install nodemon
 EXPOSE 3000
