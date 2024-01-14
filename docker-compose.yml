@@ -52,21 +52,15 @@ services:
         aliases:
             - vscode
 
+
   frontend:
     container_name: frontend
     build:
       context: .
       dockerfile: resources/DockerfileFrontend
-    links:
-      - db-mongo
-      - backend
-    command: >
-      /bin/bash -c "
-        npm install
-        npm start
-      "
     ports:
       - "3000:3000"
+      - "3001:3001"
     environment:
       - NODE_ENV=development
     volumes:
@@ -75,7 +69,6 @@ services:
       vscode:
         aliases:
             - vscode
-
 
 networks:
   vscode:
